@@ -1,93 +1,61 @@
-# --- 1) CORE PLATFORM CONTAINER ---
+locals {
+  workload_data = yamldecode(file("${path.module}/manifests/workloads.yaml"))
 
-resource "spacelift_space" "platform" {
-  name            = "Platform"
-  parent_space_id = data.spacelift_space_by_path.admin.id
-  description     = "Foundation for all platform-level infrastructure"
-  inherit_entities = true
+  # Flatten cloud -> env for sub-spaces
+  env_spaces_list = flatten([
+    for cloud in local.workload_data.clouds : [
+      for env in cloud.environments : {
+        cloud_name = cloud.name
+        env_name   = env
+        key        = "${cloud.name}/${env}"
+      }
+    ]
+  ])
+  env_spaces = { for s in local.env_spaces_list : s.key => s }
 }
 
-# --- 2) CLOUD PROVIDER CONTAINERS ---
+# --- 1) TIER 1 SIBLINGS (Under root/Environment) ---
 
-resource "spacelift_space" "azure" {
-  name            = "Azure"
-  parent_space_id = spacelift_space.platform.id
-  description     = "Isolation boundary for Azure resources"
-  inherit_entities = true
-}
-
-resource "spacelift_space" "gcp" {
-  name            = "GCP"
-  parent_space_id = spacelift_space.platform.id
-  description     = "Isolation boundary for GCP resources"
-  inherit_entities = true
-}
-
-resource "spacelift_space" "private_cloud" {
-  name            = "Private Cloud"
-  parent_space_id = spacelift_space.platform.id
-  description     = "Isolation boundary for On-Premise / Private Cloud resources"
+# Modules Space
+resource "spacelift_space" "modules" {
+  name            = "Modules"
+  parent_space_id = data.spacelift_space_by_path.env_root.id
+  description     = "Reusable code registry for ${var.environment_name}"
   inherit_entities = true
 }
 
-# --- 3) ENVIRONMENT HIERARCHY (PER CLOUD) ---
-
-# Azure Environments
-resource "spacelift_space" "azure_dev" {
-  name            = "Dev"
-  parent_space_id = spacelift_space.azure.id
-  description     = "Azure Development Environment"
-  inherit_entities = true
-}
-resource "spacelift_space" "azure_test" {
-  name            = "Test"
-  parent_space_id = spacelift_space.azure.id
-  description     = "Azure Testing Environment"
-  inherit_entities = true
-}
-resource "spacelift_space" "azure_prod" {
-  name            = "Prod"
-  parent_space_id = spacelift_space.azure.id
-  description     = "Azure Production Environment"
+# Customer Space (The Workload Container)
+resource "spacelift_space" "customer" {
+  name            = "Customer"
+  parent_space_id = data.spacelift_space_by_path.env_root.id
+  description     = "Production and Non-Production Workloads for ${var.environment_name}"
   inherit_entities = true
 }
 
-# GCP Environments
-resource "spacelift_space" "gcp_dev" {
-  name            = "Dev"
-  parent_space_id = spacelift_space.gcp.id
-  description     = "GCP Development Environment"
-  inherit_entities = true
-}
-resource "spacelift_space" "gcp_test" {
-  name            = "Test"
-  parent_space_id = spacelift_space.gcp.id
-  description     = "GCP Testing Environment"
-  inherit_entities = true
-}
-resource "spacelift_space" "gcp_prod" {
-  name            = "Prod"
-  parent_space_id = spacelift_space.gcp.id
-  description     = "GCP Production Environment"
+# Sandbox Space
+resource "spacelift_space" "sandbox" {
+  name            = "Sandbox"
+  parent_space_id = data.spacelift_space_by_path.env_root.id
+  description     = "Experimentation and Scratch space for ${var.environment_name}"
   inherit_entities = true
 }
 
-# Private Cloud Environments
-resource "spacelift_space" "private_dev" {
-  name            = "Dev"
-  parent_space_id = spacelift_space.private_cloud.id
-  description     = "Private Cloud Development Environment"
+# --- 2) TIER 2 CLOUD PROVIDERS (Under Customer) ---
+
+resource "spacelift_space" "clouds" {
+  for_each        = { for c in local.workload_data.clouds : c.name => c }
+  name            = each.key
+  parent_space_id = spacelift_space.customer.id
+  description     = "Isolation boundary for ${each.key} resources"
   inherit_entities = true
 }
-resource "spacelift_space" "private_test" {
-  name            = "Test"
-  parent_space_id = spacelift_space.private_cloud.id
-  description     = "Private Cloud Testing Environment"
-  inherit_entities = true
-}
-resource "spacelift_space" "private_prod" {
-  name            = "Prod"
-  parent_space_id = spacelift_space.private_cloud.id
-  description     = "Private Cloud Production Environment"
+
+# --- 3) TIER 3 WORKLOAD ENVIRONMENTS (Under Cloud) ---
+
+resource "spacelift_space" "workloads" {
+  for_each        = local.env_spaces
+  name            = each.value.env_name
+  parent_space_id = spacelift_space.clouds[each.value.cloud_name].id
+  description     = "${each.value.cloud_name} ${each.value.env_name} environment"
   inherit_entities = true
 }

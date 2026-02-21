@@ -1,0 +1,7 @@
+clouds:
+  - name: "Azure"
+    environments: ["Dev", "Test", "Prod"]
+  - name: "GCP"
+    environments: ["Dev", "Test", "Prod"]
+  - name: "Private Cloud"
+    environments: ["Dev", "Test", "Prod"]
