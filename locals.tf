@@ -41,7 +41,7 @@ locals {
 
   enabled_base_spaces = [
     for s in local.raw_base_spaces : s
-    if try(s.enabled, true)
+    if local.cfg_enable_component && try(s.enabled, true)
   ]
 
   base_spaces = {
@@ -53,7 +53,7 @@ locals {
 
   enabled_clouds = [
     for c in local.raw_clouds : c
-    if try(c.enabled, true)
+    if local.cfg_enable_component && try(c.enabled, true)
   ]
 
   clouds = {
