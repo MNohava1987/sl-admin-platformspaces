@@ -1,7 +1,9 @@
+manifest_version: "1"
+
 clouds:
-  - name: "Azure"
-    environments: ["Dev", "Test", "Prod"]
-  - name: "GCP"
-    environments: ["Dev", "Test", "Prod"]
-  - name: "Private Cloud"
-    environments: ["Dev", "Test", "Prod"]
+  - name: "azure"
+    environments: ["dev", "test", "prod"]
+  - name: "gcp"
+    environments: ["dev", "test", "prod"]
+  - name: "private-cloud"
+    environments: ["dev", "test", "prod"]
