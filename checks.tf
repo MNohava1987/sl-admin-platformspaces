@@ -3,10 +3,10 @@
 check "manifest_structure" {
   assert {
     condition = (
-      local.raw_base_spaces_key != "MISSING_KEY" &&
-      can(tolist(local.raw_base_spaces_key)) &&
-      local.raw_clouds_key != "MISSING_KEY" &&
-      can(tolist(local.raw_clouds_key))
+      can(local.workload_data.base_spaces) &&
+      can(tolist(local.workload_data.base_spaces)) &&
+      can(local.workload_data.clouds) &&
+      can(tolist(local.workload_data.clouds))
     )
     error_message = "The 'base_spaces' and/or 'clouds' keys are missing from workloads.yaml or are not valid lists."
   }
