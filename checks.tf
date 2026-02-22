@@ -50,7 +50,7 @@ check "cloud_environment_keys_unique_case_insensitive" {
 check "cloud_required_fields" {
   assert {
     condition = alltrue([
-      for c in local.raw_clouds : (
+      for c in local.enabled_clouds : (
         try(c.name, "") != "" &&
         can(tolist(try(c.environments, []))) &&
         length(try(c.environments, [])) > 0
@@ -77,7 +77,7 @@ check "base_space_names_unique_case_insensitive" {
 check "base_space_required_fields" {
   assert {
     condition = alltrue([
-      for s in local.raw_base_spaces : (
+      for s in local.enabled_base_spaces : (
         try(s.name, "") != "" &&
         try(s.description, "") != ""
       )

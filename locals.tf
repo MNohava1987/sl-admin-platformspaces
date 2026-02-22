@@ -22,19 +22,19 @@ locals {
     []
   )
 
-  base_space_names       = [for s in local.raw_base_spaces : try(s.name, "")]
+  base_space_names       = [for s in local.enabled_base_spaces : try(s.name, "")]
   base_space_names_lower = [for n in local.base_space_names : lower(n)]
 
-  cloud_names       = [for c in local.raw_clouds : try(c.name, "")]
+  cloud_names       = [for c in local.enabled_clouds : try(c.name, "")]
   cloud_names_lower = [for n in local.cloud_names : lower(n)]
 
   workload_env_names = flatten([
-    for c in local.raw_clouds : [for e in try(c.environments, []) : e]
+    for c in local.enabled_clouds : [for e in try(c.environments, []) : e]
   ])
   workload_env_names_lower = [for e in local.workload_env_names : lower(e)]
 
   cloud_env_keys_lower = flatten([
-    for c in local.raw_clouds : [
+    for c in local.enabled_clouds : [
       for e in try(c.environments, []) : lower("${try(c.name, "")}/${try(e, "")}")
     ]
   ])
