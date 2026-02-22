@@ -28,13 +28,13 @@ variable "naming_function_env_root_space" {
 
 variable "enable_deletion_protection" {
   type        = bool
-  default     = true
+  default     = false
   description = "DANGER: If false, managed resources may be deleted. Keep true for normal operations."
 }
 
 variable "repave_mode" {
   type        = bool
-  default     = false
+  default     = true
   description = "Set true only for intentional teardown/repave operations when deletion protection is disabled."
 }
 
