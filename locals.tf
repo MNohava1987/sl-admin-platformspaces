@@ -11,12 +11,16 @@ locals {
   cfg_repave_mode                = try(local.workload_data.settings.repave_mode, var.repave_mode)
 
   # Safe fallback for generation paths.
-  raw_base_spaces_list = try(local.workload_data.base_spaces, [])
-  raw_base_spaces      = local.raw_base_spaces_list == null ? [] : local.raw_base_spaces_list
+  raw_base_spaces = try(
+    [for s in local.workload_data.base_spaces : s],
+    []
+  )
 
   # Safe fallback for generation paths.
-  raw_clouds_list = try(local.workload_data.clouds, [])
-  raw_clouds      = local.raw_clouds_list == null ? [] : local.raw_clouds_list
+  raw_clouds = try(
+    [for c in local.workload_data.clouds : c],
+    []
+  )
 
   base_space_names       = [for s in local.raw_base_spaces : try(s.name, "")]
   base_space_names_lower = [for n in local.base_space_names : lower(n)]
