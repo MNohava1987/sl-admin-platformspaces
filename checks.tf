@@ -78,3 +78,10 @@ check "space_inheritance_consistency" {
     error_message = "All platform/workload spaces must inherit entities from their parent by design."
   }
 }
+
+check "destructive_changes_require_repave_mode" {
+  assert {
+    condition     = var.enable_deletion_protection || var.repave_mode
+    error_message = "Disabling deletion protection requires repave_mode=true for explicit operator intent."
+  }
+}
