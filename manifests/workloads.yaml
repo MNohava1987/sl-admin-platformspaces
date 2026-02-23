@@ -7,22 +7,22 @@ settings:
 
 base_spaces:
   - name: "modules"
-    enabled: true
+    enabled: false
     description: "Reusable code registry"
   - name: "customer"
-    enabled: true
+    enabled: false
     description: "Managed workload container"
   - name: "sandbox"
-    enabled: true
+    enabled: false
     description: "Experimentation and scratch space"
 
 clouds:
   - name: "azure"
-    enabled: true
+    enabled: false
     environments: ["dev", "test", "prod"]
   - name: "gcp"
-    enabled: true
+    enabled: false
     environments: ["dev", "test", "prod"]
   - name: "private-cloud"
-    enabled: true
+    enabled: false
     environments: ["dev", "test", "prod"]
